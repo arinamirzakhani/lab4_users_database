@@ -1,0 +1,24 @@
+{
+  "name": "lab4_users_database",
+  "version": "1.0.0",
+  "description": "Lab 4 - NodeJS + Express + MongoDB + Mongoose Users Database",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node seed.js",
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": ["node", "express", "mongoose", "mongodb", "lab4"],
+  "author": "Arina Mirzakhani",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "mongoose": "^9.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+
