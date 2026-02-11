@@ -4,11 +4,10 @@ require("dotenv").config();
 const User = require("./models/User");
 const raw = require("./UsersData.json");
 
-// Support array OR object shape
 const users = Array.isArray(raw) ? raw : (raw.users || raw.data || []);
 
 async function seed() {
-  console.log("=== SEED SCRIPT VERSION: v2 (count + rawResult) ===");
+  console.log("=== SEED SCRIPT (Mongoose validated version) ===");
 
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -26,9 +25,19 @@ async function seed() {
       return;
     }
 
-    // Raw MongoDB result shows insertedCount clearly
-    const rawResult = await User.collection.insertMany(users, { ordered: false });
-    console.log("🧾 Raw insertMany result insertedCount:", rawResult.insertedCount);
+    // Map JSON structure to schema fields
+    const mappedUsers = users.map((u, index) => ({
+      username: u.username || `user${index}`,
+      email: u.email,
+      city: u.city || (u.address && u.address.city),
+      website: u.website,
+      zipcode: u.zipcode || (u.address && u.address.zipcode),
+      phone: u.phone,
+    }));
+
+    // Insert using Mongoose (with validation)
+    const result = await User.insertMany(mappedUsers, { ordered: false });
+    console.log("🧾 Inserted records:", result.length);
 
     const after = await User.countDocuments();
     console.log("📌 users collection count AFTER:", after);
@@ -37,10 +46,9 @@ async function seed() {
   } catch (err) {
     console.error("❌ Seed failed.");
 
-    // Bulk write errors (duplicates, etc.)
+    // Validation or duplicate errors
     if (err && err.writeErrors) {
       console.error("WriteErrors:", err.writeErrors.length);
-      // show first 3 errors
       err.writeErrors.slice(0, 3).forEach((we, i) => {
         console.error(`--- Error ${i + 1} ---`);
         console.error(we.err?.errmsg || we.message || we);
